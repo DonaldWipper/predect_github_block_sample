@@ -20,13 +20,13 @@ def fetch(dataset_url: str) -> pd.DataFrame:
 
 
 @task(retries=3)
-def write_bq(df: pd.DataFrame) -> None:
+def write_bq(df: pd.DataFrame, color: str) -> None:
     """Write DataFrame to BiqQuery"""
 
     gcp_credentials_block = GcpCredentials.load("gcp-creds")
 
     df.to_gbq(
-        destination_table="dezoomcamp.yellow_rides",
+        destination_table=f"dezoomcamp.{color}_rides",
         project_id="zoomcamp2023",
         credentials=gcp_credentials_block.get_credentials_from_service_account(),
         chunksize=500_000,
@@ -34,10 +34,11 @@ def write_bq(df: pd.DataFrame) -> None:
     )
 
 
-@task(retries=3)
+@task(retries=3, log_prints=True)
 def extract_from_gcs(color: str, year: int, month: int) -> Path:
     """Download trip data from GCS"""
     gcs_path = f"data/{color}/{color}_tripdata_{year}-{month:02}.parquet"
+    print(gcs_path)
     gcs_block = GcsBucket.load("zoom-gcs-block")
     gcs_block.get_directory(from_path=gcs_path, local_path=f"../data/")
     return pd.read_parquet(Path(f"../data/{gcs_path}"))
@@ -103,6 +104,6 @@ def etl_parent_flow(
 
 if __name__ == "__main__":
     color = "green"
-    months = [2, 3]
-    year = 2019
+    months = [11]
+    year = 2020
     etl_parent_flow(months, year, color)
