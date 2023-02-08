@@ -89,7 +89,7 @@ def etl_web_to_gcs(year: int, month: int, color: str) -> None:
 def etl_gcs_to_bq(year: int, month: int, color: str) -> None:
     """Main ETL flow to load data into Big Query"""
     df = extract_from_gcs(color, year, month)
-    write_bq(df)
+    write_bq(df, color)
 
 
 @flow(log_prints=True)
