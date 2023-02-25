@@ -99,7 +99,7 @@ def etl_gcs_to_bq(year: int, month: int, color: str) -> None:
 
 @flow(log_prints=True)
 def etl_parent_flow(
-        months: list[int] = list(range(1, 13), year: int = 2019
+        months: list[int] = list(range(1, 13)), year: int = 2019
 ):
     for month in months:
         print(month)
